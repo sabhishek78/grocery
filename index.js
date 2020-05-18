@@ -1,5 +1,6 @@
 const axios = require('axios')
-function getTotalPriceInBaseCurrency(text,currency,date){
+function getTotalPriceInBaseCurrency (text,currency,date) {
+    let total=0;
     text=text.replace('$','USD');
     text=text.replace('€','EUR');
     text=text.replace('₹','INR');
@@ -32,15 +33,15 @@ function getTotalPriceInBaseCurrency(text,currency,date){
     const getCurrencyDetails = async () => {
          currencyDetails = await getCurrency()
         console.log(currencyDetails['data']['rates']);
-         let total=0;
+
          for(let i=0;i<currencyArray.length;i++){
            total=total+(Number(currencyArray[i][1])/Number(currencyDetails['data']['rates'][currencyArray[i][0]]))*Number(currencyDetails['data']['rates'][currency]);
-           console.log('total='+total);
+
          }
-      return total;
+        console.log(total);
     }
 
-     getCurrencyDetails();
+     return  getCurrencyDetails();
 
 
 
