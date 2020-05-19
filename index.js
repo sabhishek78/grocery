@@ -1,6 +1,7 @@
 const axios = require('axios')
-function getTotalPriceInBaseCurrency (text,currency,date) {
+async function getTotalPriceInBaseCurrency (text,currency,date) {
     let total=0;
+    let conversionRates;
     text=text.replace('$','USD');
     text=text.replace('€','EUR');
     text=text.replace('₹','INR');
@@ -14,36 +15,27 @@ function getTotalPriceInBaseCurrency (text,currency,date) {
         let currency=result[i].match(/[\d,.]+/g);
         console.log("currency="+currency);
         var currencyWithoutComma = currency.toString().replace(/,/g, "");
-
-        console.log(currencyWithoutComma);
-             temp.push(currencyWithoutComma);
+        temp.push(Number(currencyWithoutComma));
         currencyArray.push(temp);
     }
+    console.log("currencyArray");
     console.log(currencyArray);
-
-
-    const getCurrency = async () => {
-        try {
-            return await axios.get('https://openexchangerates.org/api/historical/'+date+'.json'+'?app_id='+'bf1f6617d05f4a89bb07726cb61558c6')
-        } catch (error) {
-            console.error(error)
-        }
-    }
-    let currencyDetails={};
-    const getCurrencyDetails = async () => {
-         currencyDetails = await getCurrency()
-        console.log(currencyDetails['data']['rates']);
-
-         for(let i=0;i<currencyArray.length;i++){
-           total=total+(Number(currencyArray[i][1])/Number(currencyDetails['data']['rates'][currencyArray[i][0]]))*Number(currencyDetails['data']['rates'][currency]);
-
-         }
-        console.log(total);
-    }
-
-     return  getCurrencyDetails();
-
-
+   let response=await axios.get('https://openexchangerates.org/api/historical/'+date+'.json'+'?app_id='+'bf1f6617d05f4a89bb07726cb61558c6');
+   if(response.status!==200){
+       throw(error);
+   }
+   else{
+       conversionRates=(response['data']['rates']);
+        console.log(conversionRates);
+       // console.log(currencyArray[0][0]);
+       // console.log(conversionRates[currencyArray[0][0]]);
+       // console.log(conversionRates['AUD']);
+       for(let i=0;i<currencyArray.length;i++){
+           total=total+(currencyArray[i][1])/(conversionRates[currencyArray[i][0]])*(conversionRates[currency]);
+           console.log("ttal="+total);
+       }
+     return total.toFixed(2);
+   }
 
 }
 console.log(getTotalPriceInBaseCurrency(`apples $16.00
